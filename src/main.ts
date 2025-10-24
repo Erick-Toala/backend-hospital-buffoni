@@ -3,6 +3,8 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { AllExceptionsFilter } from './common/filters/http-exception.filter';
+
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -19,8 +21,14 @@ async function bootstrap() {
       whitelist: true, // Remueve propiedades no definidas en el DTO
       forbidNonWhitelisted: true, // Lanza error si hay propiedades extras
       transform: true, // Transforma automáticamente los tipos
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
     }),
   );
+
+  // Filtro global de excepciones
+  app.useGlobalFilters(new AllExceptionsFilter());
 
   // Configuración de Swagger
   const config = new DocumentBuilder()
@@ -39,6 +47,7 @@ async function bootstrap() {
   console.log(`
     🚀 Aplicación corriendo en: http://localhost:${port}
     📚 Documentación Swagger: http://localhost:${port}/api/docs
+    🔗 Endpoint base: http://localhost:${port}/api
   `);
 }
 bootstrap();
